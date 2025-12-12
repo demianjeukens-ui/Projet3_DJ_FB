@@ -178,4 +178,16 @@ void btMapLeaves(BTree *tree, BTNode *n, void (*f)(void *data, void *fparams), v
 
 void btMergeTrees(BTree *lefttree, BTree *righttree, void *data)
 {
+  if (lefttree == NULL || righttree == NULL) // au cas ou un des arbres est NULL(n'existe pas)
+    return;
+
+  BTNode *newroot = createNode(data); // creation de la nouvelle racine
+  newroot->left = lefttree->root;     // on attache l'ancien arbre gauche a la nouvelle racine
+  if (lefttree->root != NULL)         // on verifie que l'ancien arbre gauche n'est pas vide
+    lefttree->root->parent = newroot;
+
+  newroot->right = righttree->root;
+  if (righttree->root != NULL)
+    righttree->root->parent = newroot;
+  free(righttree); // on libere la structure de l'ancien arbre droit, la structure de l'arbre gauche devient notre arbre final
 }
