@@ -157,10 +157,25 @@ int btHasRight(BTree *tree, BTNode *n)
 
 void btMapLeaves(BTree *tree, BTNode *n, void (*f)(void *data, void *fparams), void *fparams)
 {
+  if (!n) // au cas ou on appelle mapleaves la ou il n'y a pas de noeud
+    return;
 
+  if (btIsExternal(tree, n)) // si on est sur une feuille
+  {
+    void *data = btGetData(tree, n);
+    f(data, fparams); // on applique la fonction f sur la feuille(ses data)
+  }
+
+  else // on appelle recursivement sur les enfants
+  {
+    if (btHasLeft(tree, n))
+      btMapLeaves(tree, btLeft(tree, n), f, fparams);
+
+    if (btHasRight(tree, n))
+      btMapLeaves(tree, btRight(tree, n), f, fparams);
+  }
 }
 
 void btMergeTrees(BTree *lefttree, BTree *righttree, void *data)
 {
-
 }
