@@ -189,5 +189,9 @@ void btMergeTrees(BTree *lefttree, BTree *righttree, void *data)
   newroot->right = righttree->root;
   if (righttree->root != NULL)
     righttree->root->parent = newroot;
+
+  lefttree->size += righttree->size + 1; // La nouvelle taille
+  lefttree->root = newroot;              // La nouvelle racine
+
   free(righttree); // on libere la structure de l'ancien arbre droit, la structure de l'arbre gauche devient notre arbre final
 }
