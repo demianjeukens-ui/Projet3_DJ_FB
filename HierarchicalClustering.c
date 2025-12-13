@@ -6,6 +6,8 @@ struct Hclust_t
     BTree *tree;
 };
 
+/// Partie ajoutée DEM ///
+
 static void freeNodeDataRec(BTree *tree, BTNode *n) // fct recursive pour parcourir le clust et libérer la data de chaque noeud
 {
     if (n == NULL)
