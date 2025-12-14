@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <string.h> // Pour strdup
-#include <stdio.h>
+#include <stdio.h>  // Pour exit(EXIT_FAILURE)
 #include "HierarchicalClustering.h"
 #include "BTree.h"
 #include "LinkedList.h"
@@ -57,14 +57,126 @@ static void update_dict(void *data, void *fparams) // Fonction appelée par btMa
 
 Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char *, void *), void *distFnParams)
 {
-    int N = listSize(objects);
-    if (N == 0)
+    if (objects == NULL || llLength(objects) == 0)
         return NULL;
 
     Hclust *hc = malloc(sizeof(Hclust));
-    if (!hc)
-        exit(EXIT_FAILURE);
-    hc->finaltree = NULL;
+    if (hc !)
+        return NULL;
+
+    size_t number_objects = llLength(objects);
+    Dict *clusters_map = dictCreate(number_objects); // Initialisation du dictionnaire qui permettra de savoir à quel cluster appartient l'object actuel
+    List *all_pairs = llCreateEmpty();               // initialisation d'une liste qui initialement contiendra tt les pairs d'objects et leur distance
+
+    // 1. Creer les clusteur initiaux (un seul noeud) et peuplement de la carte des clusters
+    Node *p = llHead(objects);
+    while (p != NULL)
+    {
+
+        char *o_name = (char *)llData(p);
+        BTree *t = btCreate();
+        btCreateRoot(t, strdup(o_name)); // Creation d'un nouveau noeud dans t avec une copie du nom
+        dictInsert(clusters_map, o_name, t);
+        p = llNext(p);
+    }
+
+    // 2. Calcul des distances initiales par paires
+    p = llHead(objects);
+    while (p != NULL)
+    {
+
+        char *o1_name = (char *)llData(p);
+        Node *q = llNext(p);
+
+        while (q != NULL)
+        {
+
+            char *o2_name = (char *)llData(q);
+            double dist = distFn(o1_name, o2_name, distFnParams);
+
+            Pair_t *pair = malloc(sizeof(Pair_t));
+            if (!pair)
+                return NULL;
+
+            pair->o1 = o1_name;
+            pair->o2 = o2_name;
+            pair->dist = dist;
+
+            llInsertLast(all_pairs, pair);
+            q = llNext(q);
+        }
+        p = llNext(p);
+    }
+
+    // 3. Trie la liste de la plus petite à la plus grande distance entre les pairs
+    llSort(all_pairs, compare_pairs);
+
+    // 4. Fusions
+    size_t number_clusters = number_objects;
+
+    while (number_clusters > 1 && llLength(all_pairs) > 0)
+    {
+
+        Pair_t *closest_pair = (Pair_t *)llPopFirst(all_pairs);
+
+        char *o1_name = (char *)closest_pair->o1;
+        char *o2_name = (char *)closest_pair->o2;
+
+        BTree *t1 = (BTree *)dictSearch(clusters_map, o1_name); // Cluster de o1
+        BTree *t2 = (BTree *)dictSearch(clusters_map, o2_name); // Cluster de o2
+
+        if (t1 == NULL || t2 == NULL || t1 == t2)
+        {
+
+            free(closest_pair);
+            continue;
+        }
+
+        // Fusion trouvée => t1 et t2 sont les racines de deux clusteurs diff
+        number_clusters--;
+
+        // 4a. Préparation des données pour le nouveau noeud (distance de fusion)
+        double *new_dist = malloc(sizeof(double));
+        if (!new_dist)
+        {
+            free(closest_pair);
+            return NULL;
+        }
+        *new_dist = closest_pair->dist;
+
+        // 4b. Mise à jour des pointeurs de clusters
+        New_params params;
+        params.dict = clusters_map;
+        params.new_cluster = t1;
+
+        btMapLeaves(t2, btRoot(t2), update_dict, &params);
+
+        // 4c. Fusion des arbres
+        btMergeTrees(t1, t2, new_dist);
+
+        free(closest_pair);
+    }
+
+    // Liberation des pairs
+    while (llLength(all_pairs) > 0)
+    {
+        free(llPopFirst(all_pairs));
+    }
+    llFree(all_pairs);
+
+    // Arbre final
+    BTree *final_tree = NULL;
+    p = llHead(objects);
+    if (p != NULL)
+    {
+        final_tree = (BTree *)dictSearch(clusters_map, (char *)llData(p));
+    }
+
+    hc->finaltree = final_tree;
+
+    dictFree(clusters_map);
+
+    return hc;
 }
 
 /// hclustFree ///
