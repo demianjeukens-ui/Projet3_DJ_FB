@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "HierarchicalClustering.h"
 #include "BTree.h"
-#include "List.h"
+#include "LinkedList.h"
 #include "Dict.h"
 
 struct Hclust_t
@@ -92,11 +92,11 @@ void hclustFree(Hclust *hc)
     if (hc == NULL)
         return;
 
-    if (hc->tree != NULL)
+    if (hc->finaltree != NULL)
     {
-        BTNode *root = btRoot(hc->tree); // on récupère la racine pour donner a freeNodeDataRec
-        freeNodeDataRec(hc->tree, root);
-        btFree(hc->tree); // on libère l'arbre apres toute les datas pour éviter les fuites mémoires sur data
+        BTNode *root = btRoot(hc->finaltree); // on récupère la racine pour donner a freeNodeDataRec
+        freeNodeDataRec(hc->finaltree, root);
+        btFree(hc->finaltree); // on libère l'arbre apres toute les datas pour éviter les fuites mémoires sur data
     }
 
     free(hc);
@@ -115,11 +115,11 @@ static int nbLeavesRec(BTree *tree, BTNode *n) // fct recursive pour compter le 
 
 int hclustNBLeaves(Hclust *hc)
 {
-    if (hc == NULL || hc->tree == NULL) // si jamais aucun hc ou arbre
+    if (hc == NULL || hc->finaltree == NULL) // si jamais aucun hc ou arbre
         return 0;
 
-    BTNode *root = btRoot(hc->tree);    // on récupère la racine
-    return nbLeavesRec(hc->tree, root); // on appelle la fct recursive avec la racine
+    BTNode *root = btRoot(hc->finaltree);    // on récupère la racine
+    return nbLeavesRec(hc->finaltree, root); // on appelle la fct recursive avec la racine
 }
 
 /// Fonctionns statiques d'aide pour hclustClustersDist ///
@@ -174,11 +174,106 @@ static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, Li
 
 List *hclustGetClustersDist(Hclust *hc, double distanceThreshold)
 {
-    List *clusters = llCreateEmpty();   // liste de clusters a retourner
-    if (hc == NULL || hc->tree == NULL) // si jamais struct hc ou arbre dedans NULL
+    List *clusters = llCreateEmpty();        // liste de clusters a retourner
+    if (hc == NULL || hc->finaltree == NULL) // si jamais struct hc ou arbre dedans NULL
         return clusters;
 
-    BTNode *root = btRoot(hc->tree);                                    // on récupère la racine
-    clustersDistRec(hc->tree, root, NULL, distanceThreshold, clusters); // on appelle la fct recursive avec la racine
+    BTNode *root = btRoot(hc->finaltree);                                    // on récupère la racine
+    clustersDistRec(hc->finaltree, root, NULL, distanceThreshold, clusters); // on appelle la fct recursive avec la racine
     return clusters;
+}
+
+BTree *hclustGettree(Hclust *hc)
+{
+    if (hc == NULL)
+        return NULL;
+
+    return hc->finaltree;
+}
+
+static BTNode *maxDistanceNode(BTree *tree, List *nodes) // retourne le noeud interne avec la distance la plus grande pour pouvoir le couper
+{
+    double maxDist = -1.0; // on initialise a -1 pour etre sur que toute distance positive soit plus grande
+    BTNode *best = NULL;   // noeud avec la distance max
+
+    for (Node *p = llHead(nodes); p != NULL; p = llNext(p))
+    {
+        BTNode *n = (BTNode *)llData(p); // on cast le data retourné par llData en BTNode*
+        if (!btIsInternal(tree, n))      // on ne considère que les noeuds internes
+            continue;
+
+        double dist = *(double *)btGetData(tree, n); // on récupère la distance du noeud courant
+        if (best == NULL || dist > maxDist)          // premier noeud (-> initialise) ou distance plus grande que la max actuelle
+        {
+            maxDist = dist;
+            best = n;
+        }
+    }
+    return best;
+}
+
+List *hclustGetClustersK(Hclust *hc, int K)
+{
+    List *clusters = llCreateEmpty();        // liste de clusters a retourner
+    if (hc == NULL || hc->finaltree == NULL) // si jamais struct hc ou arbre dedans NULL
+        return clusters;
+
+    BTree *tree = hc->finaltree;
+    BTNode *root = btRoot(tree); // on récupère la racine
+    if (root == NULL)
+        return clusters;
+
+    List *candidates = llCreateEmpty(); // liste des noeuds candidats a être coupés
+    llInsertLast(candidates, root);     // on commence avec la racine comme
+
+    int nb = 1; // on a déjà un cluster (la racine)
+
+    while (nb < K)
+    {
+        BTNode *best = maxDistanceNode(tree, candidates); // on cherche le noeud avec la distance max
+        if (best == NULL)                                 // plus de noeud interne a couper
+            break;
+
+        List *newCandidates = llCreateEmpty(); // nouvelle liste de candidats après la coupe
+
+        while (llLength(candidates) > 0) // pour chaque noeud dans candidates
+        {
+            BTNode *cur = (BTNode *)llPopFirst(candidates); // on récupère le premier noeud
+
+            if (cur == best) // si c'est le meilleur noeud a couper
+            {
+                BTNode *l = btLeft(tree, cur);  // on récupère le fils gauche
+                BTNode *r = btRight(tree, cur); // on récupère le fils droit
+
+                if (l != NULL)
+                {
+                    llInsertLast(newCandidates, l); // on ajoute le fils gauche aux nouveaux candidats
+                    nb++;                           // on a un cluster de plus
+                }
+                if (r != NULL)
+                {
+                    llInsertLast(newCandidates, r); // on ajoute le fils droit aux nouveaux candidats
+                    nb++;                           // on a un cluster de plus
+                }
+                else // sinon on garde le noeud tel quel
+                {
+                    llInsertLast(newCandidates, cur);
+                }
+            }
+            llFree(candidates);         // on libère l'ancienne liste de candidats
+            candidates = newCandidates; // on remplace par la nouvelle liste
+            nb++;                       // on a un cluster de plus
+        }
+
+        for (Node *p = llHead(candidates); p != NULL; p = llNext(p))
+        {
+            BTNode *n = (BTNode *)llData(p); // on cast le data retourné par llData en BTNode*
+            List *new = llCreateEmpty();     // on crée une "new"list pour stocker les feuilles du cluster
+            collectLeavesRec(tree, n, new);  // on collecte les feuilles du cluster
+            llInsertLast(clusters, new);     // on ajoute le "new"cluster a la liste des clusters
+        }
+
+        llFree(candidates); // on libère la liste des candidats
+        return clusters;
+    }
 }
