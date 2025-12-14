@@ -26,8 +26,9 @@ typedef struct
     BTree *new_cluster;
 } New_params;
 
-// Compare les distances des pairs A et B
-static int compare_pairs(const void *a, const void *b)
+/// hclustBuildTree///
+
+static int compare_pairs(const void *a, const void *b) // Compare les distances des pairs A et B
 {
 
     const Pair_t **Pair_A = (const Pair_t **)a;
@@ -45,8 +46,7 @@ static int compare_pairs(const void *a, const void *b)
     return 0;
 }
 
-// Fonction appelée par btMapLeaves pour mettre à jour le dictionnaire
-static void update_dict(void *data, void *fparams)
+static void update_dict(void *data, void *fparams) // Fonction appelée par btMapLeaves pour mettre à jour le dictionnaire
 {
     const char *object_name = (const char *)data;
     New_params *params = (New_params *)fparams;
@@ -67,7 +67,7 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
     hc->finaltree = NULL;
 }
 
-/// Partie ajoutée DEM ///
+/// hclustFree ///
 
 static void freeNodeDataRec(BTree *tree, BTNode *n) // fct recursive pour parcourir le clust et libérer la data de chaque noeud
 {
@@ -102,6 +102,33 @@ void hclustFree(Hclust *hc)
     free(hc);
 }
 
+/// hclustDepth ///
+
+static int depthRec(BTree *tree, BTNode *n) // fct recursive pour calculer la profondeur
+{
+    if (n == NULL) // si pas de noeud
+        return 0;
+
+    if (btIsExternal(tree, n)) // si on est sur une feuille
+        return 0;
+
+    int leftDepth = depthRec(tree, btLeft(tree, n));   // profondeur du sous-arbre gauche
+    int rightDepth = depthRec(tree, btRight(tree, n)); // profondeur du sous-arbre droit
+
+    return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth); // on retourne la profondeur max + 1(pour le noeud courant)
+}
+
+int hclustDepth(Hclust *hc)
+{
+    if (hc == NULL || hc->finaltree == NULL) // si aucun hc ou hc vide
+        return 0;
+
+    BTNode *root = btRoot(hc->finaltree); // on récupère la racine
+    return depthRec(hc->finaltree, root); // on appelle la fct recursive avec la racine
+}
+
+/// hclustNBLeaves ///
+
 static int nbLeavesRec(BTree *tree, BTNode *n) // fct recursive pour compter le nb de feuilles
 {
     if (n == NULL)
@@ -122,7 +149,40 @@ int hclustNBLeaves(Hclust *hc)
     return nbLeavesRec(hc->finaltree, root); // on appelle la fct recursive avec la racine
 }
 
-/// Fonctionns statiques d'aide pour hclustClustersDist ///
+/// hclustPrintTree ///
+
+static void printRec(FILE *out, BTree *tree, BTNode *n, int indent)
+{
+    if (n == NULL)
+        return;
+
+    for (int i = 0; i < indent; i++) // fais des indentations pour la lisibilité
+        fprintf(out, "  ");
+
+    if (btIsExternal(tree, n)) // si on est sur une feuille
+    {
+        fprintf(out, "%s\n", (char *)btGetData(tree, n)); // on imprime le nom de l'objet
+    }
+    else // noeud interne
+    {
+        double dist = *(double *)btGetData(tree, n); // on récupère la distance
+        fprintf(out, "Distance: %.4f\n", dist);      // on imprime la distance
+
+        printRec(out, tree, btLeft(tree, n), indent + 1);  // on descend dans le sous-arbre gauche
+        printRec(out, tree, btRight(tree, n), indent + 1); // on descend dans le sous-arbre droit
+    }
+}
+
+void hclustPrintTree(FILE *fp, Hclust *hc)
+{
+    if (hc == NULL || hc->finaltree == NULL) // si jamais aucun hc ou hc vide
+        return;
+
+    BTNode *root = btRoot(hc->finaltree); // on récupère la racine
+    printRec(fp, hc->finaltree, root, 0); // on appelle la fct recursive avec la racine
+}
+
+/// hclustClustersDist ///
 
 static void collectLeavesRec(BTree *tree, BTNode *n, List *out) // fct recursive pour faire une liste des feuilles d'un sous-arbre/cluster(methode plus facile qu'avec mapleaves)
 {
@@ -183,13 +243,7 @@ List *hclustGetClustersDist(Hclust *hc, double distanceThreshold)
     return clusters;
 }
 
-BTree *hclustGettree(Hclust *hc)
-{
-    if (hc == NULL)
-        return NULL;
-
-    return hc->finaltree;
-}
+/// hclustGetClustersK ///
 
 static BTNode *maxDistanceNode(BTree *tree, List *nodes) // retourne le noeud interne avec la distance la plus grande pour pouvoir le couper
 {
@@ -276,4 +330,14 @@ List *hclustGetClustersK(Hclust *hc, int K)
         llFree(candidates); // on libère la liste des candidats
         return clusters;
     }
+}
+
+/// hclustGettree ///
+
+BTree *hclustGettree(Hclust *hc)
+{
+    if (hc == NULL)
+        return NULL;
+
+    return hc->finaltree;
 }
