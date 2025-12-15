@@ -344,7 +344,7 @@ static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, Li
     clustersDistRec(tree, btRight(tree, n), n, T, clusters);
 }
 
-List *hclustGetClustersDist(Hclust *hc, double distanceThreshold)
+List *Dist(Hclust *hc, double distanceThreshold)
 {
     List *clusters = llCreateEmpty();        // liste de clusters a retourner
     if (hc == NULL || hc->finaltree == NULL) // si jamais struct hc ou arbre dedans NULL
