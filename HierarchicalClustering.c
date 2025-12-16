@@ -259,7 +259,7 @@ static int nbLeavesRec(BTree *tree, BTNode *n) // fct recursive pour compter le 
     return nbLeavesRec(tree, btLeft(tree, n)) + nbLeavesRec(tree, btRight(tree, n)); // somme des feuilles des sous-arbres
 }
 
-int hclustNBLeaves(Hclust *hc)
+int hclustNbLeaves(Hclust *hc)
 {
     if (hc == NULL || hc->finaltree == NULL) // si jamais aucun hc ou arbre
         return 0;
@@ -447,13 +447,13 @@ List *hclustGetClustersK(Hclust *hc, int K)
         }
 
         llFree(candidates); // on libère la liste des candidats
-        return clusters;
     }
+    return clusters;
 }
 
-/// hclustGettree ///
+/// hclustGetTree ///
 
-BTree *hclustGettree(Hclust *hc)
+BTree *hclustGetTree(Hclust *hc)
 {
     if (hc == NULL)
         return NULL;

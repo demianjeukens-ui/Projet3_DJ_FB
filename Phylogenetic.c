@@ -23,7 +23,7 @@ static int isPyrimidine(char base)
     return (base == 'C' || base == 'T');
 }
 
-double phyloDNADist(char *dna1, char *dna2)
+double phyloDNADistance(char *dna1, char *dna2)
 {
     size_t len1 = strlen(dna1);
     size_t len2 = strlen(dna2);
