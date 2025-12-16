@@ -28,11 +28,11 @@ typedef struct
 
 /// hclustBuildTree///
 
-static int compare_pairs(const void *a, const void *b) // Compare les distances des pairs A et B
+static int compare_pairs(void *a, void *b) // Compare les distances des pairs A et B
 {
 
-    const Pair_t **Pair_A = (const Pair_t **)a;
-    const Pair_t **Pair_B = (const Pair_t **)b;
+    Pair_t **Pair_A = (Pair_t **)a;
+    Pair_t **Pair_B = (Pair_t **)b;
 
     double dist_A = (*Pair_A)->dist;
     double dist_B = (*Pair_B)->dist;
@@ -61,7 +61,7 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
         return NULL;
 
     Hclust *hc = malloc(sizeof(Hclust));
-    if (hc !)
+    if (hc == NULL)
         return NULL;
 
     size_t number_objects = llLength(objects);
@@ -75,7 +75,14 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
 
         char *o_name = (char *)llData(p);
         BTree *t = btCreate();
-        btCreateRoot(t, strdup(o_name)); // Creation d'un nouveau noeud dans t avec une copie du nom
+
+        char *name_cpy = malloc(strlen(o_name) + 1); // change pour strdup car non standard
+        if (name_cpy == NULL)
+            return NULL;
+
+        strcpy(name_cpy, o_name);
+
+        btCreateRoot(t, name_cpy); // Creation d'un nouveau noeud dans t avec une copie du nom
         dictInsert(clusters_map, o_name, t);
         p = llNext(p);
     }
@@ -307,8 +314,8 @@ static void collectLeavesRec(BTree *tree, BTNode *n, List *out) // fct recursive
         return;
     }
 
-    collectLeavesRec(tree, btLeft(tree, n), n);  // on descend dans le sous-arbre gauche
-    collectLeavesRec(tree, btRight(tree, n), n); // on descend dans le sous-arbre droit
+    collectLeavesRec(tree, btLeft(tree, n), out);  // on descend dans le sous-arbre gauche
+    collectLeavesRec(tree, btRight(tree, n), out); // on descend dans le sous-arbre droit
 }
 
 static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, List *clusters) // T pour threshold(plus court)
@@ -344,7 +351,7 @@ static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, Li
     clustersDistRec(tree, btRight(tree, n), n, T, clusters);
 }
 
-List *Dist(Hclust *hc, double distanceThreshold)
+List *hclustGetClustersDist(Hclust *hc, double distanceThreshold)
 {
     List *clusters = llCreateEmpty();        // liste de clusters a retourner
     if (hc == NULL || hc->finaltree == NULL) // si jamais struct hc ou arbre dedans NULL
