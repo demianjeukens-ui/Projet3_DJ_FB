@@ -73,3 +73,95 @@ double phyloDNADistance(char *dna1, char *dna2)
 
     return dist;
 }
+
+/// phyloTreeCreate ///
+
+#define MAXLINE_LENGTH 1024 // eviter les debordemnents de buffer avec fgets
+// 1024 borne raisonnable et standard pour la plupart des cas
+static double phyloDistFn(const char *obj1, const char *obj2, void *params)
+{
+    PhyloDistParams *p = (PhyloDistParams *)params;
+
+    char *dna1 = (char *)dictSearch(p->dna_sequences, obj1);
+    char *dna2 = (char *)dictSearch(p->dna_sequences, obj2);
+
+    if (dna1 == NULL || dna2 == NULL) // si le fichier est mal formé
+    {
+        return 1e9; // Valeur arbitraire pour dire que la distance est trop grande
+    }
+
+    return phyloDNADistance(dna1, dna2);
+}
+
+Hclust *phyloTreeCreate(char *dna_sequences)
+{
+    char buffer[MAXLINE_LENGTH];
+    FILE *file = fopen(dna_sequences, "r");
+
+    if (file == NULL)
+    {
+        return NULL;
+    }
+
+    List *names = llCreateEmpty();
+    Dict *DNA_dict = dictCreate(1000);
+
+    while (fgets(buffer, MAXLINE_LENGTH, file))
+    {
+        size_t len = strlen(buffer);
+        if (len > 0 && buffer[len - 1] == '\n')
+        {
+            buffer[len - 1] = '\0';
+        }
+        if (buffer[0] == '\0')
+        {
+            continue;
+        }
+
+        char *comma = strchr(buffer, ',');
+        if (comma == NULL)
+        {
+            continue; // Ligne mal formée
+        }
+
+        *comma = '\0';
+        char *name_in = buffer;
+        char *dna_in = comma + 1;
+
+        char *name = malloc(strlen(name_in) + 1);
+        if (name == NULL)
+        {
+            fclose(file);
+            llFree(names);
+            dictFree(DNA_dict);
+            return NULL;
+        }
+        strcpy(name, name_in);
+
+        char *dna = malloc(strlen(dna_in) + 1);
+        if (dna == NULL)
+        {
+            free(name);
+            fclose(file);
+            llFree(names);
+            dictFree(DNA_dict);
+            return NULL;
+        }
+        strcpy(dna, dna_in);
+
+        llInsertLast(names, name);
+        dictInsert(DNA_dict, name, dna);
+    }
+
+    fclose(file);
+
+    PhyloDistParams params;
+    params.dna_sequences = DNA_dict;
+
+    Hclust *hc = hclustBuildTree(names, phyloDistFn, &params);
+
+    dictFreeValues(DNA_dict, free); // Libération des séquences d'ADN
+    llFreeData(names);              // Libération des noms
+
+    return hc;
+}
