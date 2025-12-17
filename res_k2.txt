@@ -1,0 +1,101 @@
+Distance: 5.7271
+  malignant84348301
+  Distance: 5.2304
+    Distance: 3.0889
+      benign915186
+      Distance: 3.0559
+        Distance: 2.9812
+          malignant9113538
+          Distance: 2.7937
+            malignant9013838
+            Distance: 2.7782
+              malignant88725602
+              Distance: 2.5509
+                Distance: 2.4301
+                  malignant8711803
+                  Distance: 2.4092
+                    malignant925622
+                    Distance: 2.3743
+                      malignant885429
+                      Distance: 2.3337
+                        Distance: 2.2105
+                          Distance: 2.1444
+                            Distance: 1.9811
+                              malignant89742801
+                              Distance: 1.8490
+                                malignant894618
+                                Distance: 1.4690
+                                  Distance: 1.3148
+                                    malignant844359
+                                    malignant901088
+                                  malignant901288
+                            Distance: 2.1134
+                              malignant853201
+                              Distance: 2.0725
+                                Distance: 1.9841
+                                  malignant87164
+                                  Distance: 1.8860
+                                    Distance: 1.7778
+                                      Distance: 1.6209
+                                        malignant854268
+                                        Distance: 1.2689
+                                          malignant862028
+                                          malignant87281702
+                                      malignant85638502
+                                    Distance: 1.8001
+                                      Distance: 1.7523
+                                        benign88143502
+                                        Distance: 1.7404
+                                          Distance: 1.6959
+                                            benign873843
+                                            Distance: 1.6882
+                                              benign91805
+                                              Distance: 1.5636
+                                                Distance: 1.0153
+                                                  malignant845636
+                                                  malignant889403
+                                                Distance: 1.5182
+                                                  Distance: 1.5118
+                                                    benign869254
+                                                    benign901034302
+                                                  Distance: 1.4464
+                                                    benign905557
+                                                    Distance: 1.4412
+                                                      Distance: 1.4407
+                                                        benign898690
+                                                        Distance: 1.4157
+                                                          benign865468
+                                                          Distance: 1.4135
+                                                            Distance: 1.3831
+                                                              Distance: 1.2682
+                                                                Distance: 1.2494
+                                                                  benign9047
+                                                                  benign8510653
+                                                                Distance: 1.2462
+                                                                  benign911320502
+                                                                  benign91903902
+                                                              Distance: 1.0052
+                                                                benign911384
+                                                                benign905189
+                                                            unknown
+                                                      Distance: 1.4234
+                                                        benign91858
+                                                        benign868223
+                                          benign91544002
+                                      Distance: 1.7302
+                                        benign864033
+                                        Distance: 1.5301
+                                          benign8912055
+                                          Distance: 1.4943
+                                            benign9113514
+                                            benign85759902
+                                benign912600
+                          Distance: 0.9762
+                            benign9111596
+                            benign90250
+                        Distance: 1.9879
+                          malignant84667401
+                          malignant864877
+                malignant875263
+        malignant8511133
+    malignant855625
