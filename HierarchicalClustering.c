@@ -28,19 +28,16 @@ typedef struct
 
 /// hclustBuildTree///
 
-static int compare_pairs(void *a, void *b) // Compare les distances des pairs A et B
+static int compare_pairs(const void *a, const void *b) // Compare les distances des pairs A et B
 {
 
-    Pair_t **Pair_A = (Pair_t **)a;
-    Pair_t **Pair_B = (Pair_t **)b;
+    const Pair_t *Pair_A = (const Pair_t *)a;
+    const Pair_t *Pair_B = (const Pair_t *)b;
 
-    double dist_A = (*Pair_A)->dist;
-    double dist_B = (*Pair_B)->dist;
-
-    if (dist_A < dist_B)
+    if (Pair_A->dist < Pair_B->dist)
         return -1;
 
-    if (dist_A > dist_B)
+    if (Pair_A->dist > Pair_B->dist)
         return 1;
 
     return 0;
@@ -399,9 +396,7 @@ List *hclustGetClustersK(Hclust *hc, int K)
     List *candidates = llCreateEmpty(); // liste des noeuds candidats a être coupés
     llInsertLast(candidates, root);     // on commence avec la racine comme
 
-    int nb = 1; // on a déjà un cluster (la racine)
-
-    while (nb < K)
+    while ((int)llLength(candidates) < K)
     {
         BTNode *best = maxDistanceNode(tree, candidates); // on cherche le noeud avec la distance max
         if (best == NULL)                                 // plus de noeud interne a couper
@@ -421,33 +416,37 @@ List *hclustGetClustersK(Hclust *hc, int K)
                 if (l != NULL)
                 {
                     llInsertLast(newCandidates, l); // on ajoute le fils gauche aux nouveaux candidats
-                    nb++;                           // on a un cluster de plus
                 }
                 if (r != NULL)
                 {
                     llInsertLast(newCandidates, r); // on ajoute le fils droit aux nouveaux candidats
-                    nb++;                           // on a un cluster de plus
                 }
-                else // sinon on garde le noeud tel quel
+                if (!l && !r) // si best est une feuille(on ne peut pas la couper)
                 {
-                    llInsertLast(newCandidates, cur);
+                    llInsertLast(newCandidates, cur); // on réajoute le noeud courant
                 }
             }
-            llFree(candidates);         // on libère l'ancienne liste de candidats
-            candidates = newCandidates; // on remplace par la nouvelle liste
-            nb++;                       // on a un cluster de plus
+            else
+            {
+                llInsertLast(newCandidates, cur); // on réajoute le noeud courant
+            }
+            // on a un cluster de plus
         }
-
-        for (Node *p = llHead(candidates); p != NULL; p = llNext(p))
-        {
-            BTNode *n = (BTNode *)llData(p); // on cast le data retourné par llData en BTNode*
-            List *new = llCreateEmpty();     // on crée une "new"list pour stocker les feuilles du cluster
-            collectLeavesRec(tree, n, new);  // on collecte les feuilles du cluster
-            llInsertLast(clusters, new);     // on ajoute le "new"cluster a la liste des clusters
-        }
-
-        llFree(candidates); // on libère la liste des candidats
+        llFree(candidates);         // on libère l'ancienne liste de candidats
+        candidates = newCandidates; // on met a jour candidates avec la nouvelle liste
     }
+
+    // construire la liste des clusters a retourner
+    for (Node *p = llHead(candidates); p != NULL; p = llNext(p))
+    {
+        BTNode *n = (BTNode *)llData(p); // on cast le data retourné par llData en BTNode*
+        List *new = llCreateEmpty();     // on crée une "new"list pour stocker les feuilles du cluster
+        collectLeavesRec(tree, n, new);  // on collecte les feuilles du cluster
+        llInsertLast(clusters, new);     // on ajoute le "new"cluster a la liste des clusters
+    }
+
+    llFree(candidates); // on libère la liste des candidats
+    candidates = NULL;  // on évite les fuites mémoires
     return clusters;
 }
 
