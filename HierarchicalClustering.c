@@ -164,7 +164,8 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
     // Liberation des pairs
     while (llLength(all_pairs) > 0)
     {
-        free(llPopFirst(all_pairs));
+        Pair_t *p_to_free = (Pair_t *)llPopFirst(all_pairs);
+        free(p_to_free); // Libère la structure Pair_t
     }
     llFree(all_pairs);
 
