@@ -1,0 +1,42 @@
+Ne modifiez pas ce fichier (mÃªme cette ligne) sauf pour y ajouter vos rÃ©ponses
+aux endroits marquÃ©s de "..."
+
+RÃ¨gles concernant le plagiat:
+============================= 
+
+En soumettant votre projet et ce rapport, vous attestez que vous Ãªtes les uniques auteurs 
+du code soumis et que vous avez respectÃ© les rÃ©gles en matiÃ¨re de plagiat relatives Ã  ce 
+cours, indiquÃ©es aux slides 9 et 10 du cours thÃ©orique (pas d'Ã©change de codes entre groupes,
+pas d'appel Ã  un tiers, pas d'utilisation d'outils d'intelligence artificielle tels que
+ChatGPT ou Copilot, etc.).
+
+
+Informations etudiants:
+=======================
+
+Etudiant 1:
+Matricule: s2404239
+Nom: Jeukens
+PrÃ©nom: Demian
+Contribution au projet: 50 %
+
+Etudiant 2: (laissez vide si vous avez fait le projet seul)
+Matricule: s2401942
+Nom: Bonnechère
+PrÃ©nom: Florent
+Contribution au projet: 50 %
+
+ComplexitÃ©s:
+============
+
+Donnez les complexitÃ©s des fonctions suivantes (en fonction du nombre d'objets N et de K):
+
+hclustBuildTree: O(N²log(N))
+hclustGetClustersK: O(KN)
+
+Application:
+============
+
+Quel est selon vous le type de la tumeur inconnue du fichier dna-breastcancer.csv (maligne ou bÃ©nigne) ? 
+
+Type: bénigne

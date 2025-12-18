@@ -27,20 +27,24 @@ double phyloDNADistance(char *dna1, char *dna2)
 {
     size_t len1 = strlen(dna1);
     size_t len2 = strlen(dna2);
-    size_t n = (len1 < len2) ? len1 : len2;
 
-    if (n == 0)
-    {
-        return 0.0;
-    }
+    size_t n_min = (len1 < len2) ? len1 : len2;
 
-    int count_Q = 0; // Transition (Q)
-    int count_P = 0; // Transversion (P)
+    int count_Q = 0; // Transitions
+    int count_P = 0; // Transversions
+    int n = 0;
 
-    for (size_t i = 0; i < n; i++)
+    for (size_t i = 0; i < n_min; i++)
     {
         char base1 = dna1[i];
         char base2 = dna2[i];
+
+        if (base1 < 'A' || base2 < 'A')
+        {
+            continue;
+        }
+
+        n++;
 
         if (base1 == base2)
         {
@@ -58,6 +62,11 @@ double phyloDNADistance(char *dna1, char *dna2)
         }
     }
 
+    if (n == 0)
+    {
+        return 0.0;
+    }
+
     double Q = (double)count_Q / n;
     double P = (double)count_P / n;
 
@@ -66,10 +75,10 @@ double phyloDNADistance(char *dna1, char *dna2)
 
     if (arg1 <= 0.0 || arg2 <= 0.0)
     {
-        return 1000.0; // Valeur arbitraire pour dire que la distance est trop grande
+        return 1000.0;
     }
 
-    double dist = -0.5 * log(arg1) - 0.25 * log(arg2); // Formule de l'énoncé
+    double dist = -0.5 * log(arg1) - 0.25 * log(arg2);
 
     return dist;
 }
@@ -108,11 +117,8 @@ Hclust *phyloTreeCreate(char *dna_sequences)
 
     while (fgets(buffer, MAXLINE_LENGTH, file))
     {
-        size_t len = strlen(buffer);
-        if (len > 0 && buffer[len - 1] == '\n')
-        {
-            buffer[len - 1] = '\0';
-        }
+        buffer[strcspn(buffer, "\r\n")] = '\0';
+
         if (buffer[0] == '\0')
         {
             continue;
