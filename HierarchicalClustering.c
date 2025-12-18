@@ -325,6 +325,7 @@ void hclustPrintTree(FILE *fp, Hclust *hc)
         return;
     }
     printRec(fp, hc->finaltree, root, 0.0, 1); // on appelle la fct recursive avec la racine
+    fprintf(fp, ";\n");
 }
 
 /// hclustClustersDist ///
@@ -357,6 +358,7 @@ static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, Li
                                                // feuilles du cluster
         llInsertLast(new, btGetData(tree, n)); // on ajoute la feuille elle-même
         llInsertLast(clusters, new);           // on ajoute le "new"cluster a la liste des clusters
+        return;
     }
 
     double dn = *(double *)btGetData(tree, n); // distance du noeud courant(on cast le
