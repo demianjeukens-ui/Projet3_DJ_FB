@@ -1,10 +1,12 @@
+#include "HierarchicalClustering.h"
+
+#include <stdio.h> // Pour exit(EXIT_FAILURE)
 #include <stdlib.h>
 #include <string.h> // Pour strdup
-#include <stdio.h>  // Pour exit(EXIT_FAILURE)
-#include "HierarchicalClustering.h"
+
 #include "BTree.h"
-#include "LinkedList.h"
 #include "Dict.h"
+#include "LinkedList.h"
 
 struct Hclust_t
 {
@@ -19,7 +21,8 @@ typedef struct
     double dist;    // Distance entre les 2 objets
 } Pair_t;
 
-// Structure permettant de passer les nouveaux paramètres(Dict et nouveau cluster) en arguments de btMapLeaves
+// Structure permettant de passer les nouveaux paramètres(Dict et nouveau
+// cluster) en arguments de btMapLeaves
 typedef struct
 {
     Dict *dict;
@@ -28,9 +31,8 @@ typedef struct
 
 /// hclustBuildTree///
 
-static int compare_pairs(const void *a, const void *b) // Compare les distances des pairs A et B
+static int compare_pairs(void *a, void *b) // Compare les distances des pairs A et B
 {
-
     const Pair_t *Pair_A = (const Pair_t *)a;
     const Pair_t *Pair_B = (const Pair_t *)b;
 
@@ -43,7 +45,8 @@ static int compare_pairs(const void *a, const void *b) // Compare les distances 
     return 0;
 }
 
-static void update_dict(void *data, void *fparams) // Fonction appelée par btMapLeaves pour mettre à jour le dictionnaire
+static void update_dict(void *data, void *fparams) // Fonction appelée par btMapLeaves pour
+                                                   // mettre a jour le dictionnaire
 {
     const char *object_name = (const char *)data;
     New_params *params = (New_params *)fparams;
@@ -62,14 +65,16 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
         return NULL;
 
     size_t number_objects = llLength(objects);
-    Dict *clusters_map = dictCreate(number_objects); // Initialisation du dictionnaire qui permettra de savoir à quel cluster appartient l'object actuel
-    List *all_pairs = llCreateEmpty();               // initialisation d'une liste qui initialement contiendra tt les pairs d'objects et leur distance
+    Dict *clusters_map = dictCreate(number_objects); // Initialisation du dictionnaire qui permettra de
+                                                     // savoir à quel cluster appartient l'object actuel
+    List *all_pairs = llCreateEmpty();               // initialisation d'une liste qui initialement
+                                                     // contiendra tt les pairs d'objects et leur distance
 
-    // 1. Creer les clusteur initiaux (un seul noeud) et peuplement de la carte des clusters
+    // 1. Creer les clusteur initiaux (un seul noeud) et peuplement de la carte
+    // des clusters
     Node *p = llHead(objects);
     while (p != NULL)
     {
-
         char *o_name = (char *)llData(p);
         BTree *t = btCreate();
 
@@ -88,13 +93,11 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
     p = llHead(objects);
     while (p != NULL)
     {
-
         char *o1_name = (char *)llData(p);
         Node *q = llNext(p);
 
         while (q != NULL)
         {
-
             char *o2_name = (char *)llData(q);
             double dist = distFn(o1_name, o2_name, distFnParams);
 
@@ -112,7 +115,8 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
         p = llNext(p);
     }
 
-    // 3. Trie la liste de la plus petite à la plus grande distance entre les pairs
+    // 3. Trie la liste de la plus petite à la plus grande distance entre les
+    // pairs
     llSort(all_pairs, compare_pairs);
 
     // 4. Fusions
@@ -120,7 +124,6 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
 
     while (number_clusters > 1 && llLength(all_pairs) > 0)
     {
-
         Pair_t *closest_pair = (Pair_t *)llPopFirst(all_pairs);
 
         char *o1_name = (char *)closest_pair->o1;
@@ -131,7 +134,6 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
 
         if (t1 == NULL || t2 == NULL || t1 == t2)
         {
-
             free(closest_pair);
             continue;
         }
@@ -186,7 +188,8 @@ Hclust *hclustBuildTree(List *objects, double (*distFn)(const char *, const char
 
 /// hclustFree ///
 
-static void freeNodeDataRec(BTree *tree, BTNode *n) // fct recursive pour parcourir le clust et libérer la data de chaque noeud
+static void freeNodeDataRec(BTree *tree, BTNode *n) // fct recursive pour parcourir le clust
+                                                    // et libérer la data de chaque noeud
 {
     if (n == NULL)
         return;
@@ -211,9 +214,11 @@ void hclustFree(Hclust *hc)
 
     if (hc->finaltree != NULL)
     {
-        BTNode *root = btRoot(hc->finaltree); // on récupère la racine pour donner a freeNodeDataRec
+        BTNode *root = btRoot(
+            hc->finaltree); // on récupère la racine pour donner a freeNodeDataRec
         freeNodeDataRec(hc->finaltree, root);
-        btFree(hc->finaltree); // on libère l'arbre apres toute les datas pour éviter les fuites mémoires sur data
+        btFree(hc->finaltree); // on libère l'arbre apres toute les datas pour
+                               // éviter les fuites mémoires sur data
     }
 
     free(hc);
@@ -229,8 +234,10 @@ static int depthRec(BTree *tree, BTNode *n) // fct recursive pour calculer la pr
     if (btIsExternal(tree, n)) // si on est sur une feuille
         return 0;
 
-    int leftDepth = depthRec(tree, btLeft(tree, n));   // profondeur du sous-arbre gauche
-    int rightDepth = depthRec(tree, btRight(tree, n)); // profondeur du sous-arbre droit
+    int leftDepth =
+        depthRec(tree, btLeft(tree, n)); // profondeur du sous-arbre gauche
+    int rightDepth =
+        depthRec(tree, btRight(tree, n)); // profondeur du sous-arbre droit
 
     return 1 + (leftDepth > rightDepth ? leftDepth : rightDepth); // on retourne la profondeur max + 1(pour le noeud courant)
 }
@@ -254,7 +261,8 @@ static int nbLeavesRec(BTree *tree, BTNode *n) // fct recursive pour compter le 
     if (btIsExternal(tree, n)) // si on est sur une feuille
         return 1;
 
-    return nbLeavesRec(tree, btLeft(tree, n)) + nbLeavesRec(tree, btRight(tree, n)); // somme des feuilles des sous-arbres
+    return nbLeavesRec(tree, btLeft(tree, n)) +
+           nbLeavesRec(tree, btRight(tree, n)); // somme des feuilles des sous-arbres
 }
 
 int hclustNbLeaves(Hclust *hc)
@@ -268,26 +276,36 @@ int hclustNbLeaves(Hclust *hc)
 
 /// hclustPrintTree ///
 
-static void printRec(FILE *out, BTree *tree, BTNode *n, int indent)
+static double nodeDistance(BTree *tree, BTNode *n)
 {
-    if (n == NULL)
-        return;
+    if (n == NULL || btIsExternal(tree, n))
+        return 0.0;
 
-    for (int i = 0; i < indent; i++) // fais des indentations pour la lisibilité
-        fprintf(out, "  ");
+    return *(double *)btGetData(tree, n);
+}
 
+static void printRec(FILE *out, BTree *tree, BTNode *n, double parent_dist, int isRoot)
+{
     if (btIsExternal(tree, n)) // si on est sur une feuille
     {
-        fprintf(out, "%s\n", (char *)btGetData(tree, n)); // on imprime le nom de l'objet
-    }
-    else // noeud interne
-    {
-        double dist = *(double *)btGetData(tree, n); // on récupère la distance
-        fprintf(out, "Distance: %.4f\n", dist);      // on imprime la distance
+        fprintf(out, "%s",
+                (char *)btGetData(tree, n)); // on imprime le nom de l'objet
 
-        printRec(out, tree, btLeft(tree, n), indent + 1);  // on descend dans le sous-arbre gauche
-        printRec(out, tree, btRight(tree, n), indent + 1); // on descend dans le sous-arbre droit
+        if (!isRoot) // si ce n'est pas la racine on imprime la distance au parent
+            fprintf(out, ":%f", parent_dist);
+        return;
     }
+
+    double dist = nodeDistance(tree, n);
+
+    fprintf(out, "(");
+    printRec(out, tree, btLeft(tree, n), dist, 0); // on descend dans le sous-arbre gauche
+    fprintf(out, ",");
+    printRec(out, tree, btRight(tree, n), dist, 0); // on descend dans le sous-arbre droit
+    fprintf(out, ")");
+
+    if (!isRoot) // si ce n'est pas la racine on imprime la distance au parent
+        fprintf(out, ":%f", parent_dist - dist);
 }
 
 void hclustPrintTree(FILE *fp, Hclust *hc)
@@ -296,12 +314,24 @@ void hclustPrintTree(FILE *fp, Hclust *hc)
         return;
 
     BTNode *root = btRoot(hc->finaltree); // on récupère la racine
-    printRec(fp, hc->finaltree, root, 0); // on appelle la fct recursive avec la racine
+    if (root == NULL)
+        return;
+
+    if (btIsExternal(hc->finaltree, root))
+    {
+        // Si l'arbre ne contient qu'une seule feuille, on imprime simplement son
+        // nom
+        fprintf(fp, "%s;\n", (char *)btGetData(hc->finaltree, root));
+        return;
+    }
+    printRec(fp, hc->finaltree, root, 0.0, 1); // on appelle la fct recursive avec la racine
 }
 
 /// hclustClustersDist ///
 
-static void collectLeavesRec(BTree *tree, BTNode *n, List *out) // fct recursive pour faire une liste des feuilles d'un sous-arbre/cluster(methode plus facile qu'avec mapleaves)
+static void collectLeavesRec(
+    BTree *tree, BTNode *n, List *out) // fct recursive pour faire une liste des feuilles d'un
+                                       // sous-arbre/cluster(methode plus facile qu'avec mapleaves)
 {
     if (n == NULL)
         return;
@@ -321,26 +351,35 @@ static void clustersDistRec(BTree *tree, BTNode *n, BTNode *parent, double T, Li
     if (n == NULL)
         return;
 
-    if (btIsInternal(tree, n)) // verifie que c'est un noeud interne
+    if (btIsExternal(tree, n)) // si on est sur une feuille on retourne
     {
-        double dn = *(double *)btGetData(tree, n); // distance du noeud courant(on cast le retour de GetData en double)
+        List *new = llCreateEmpty();           // on cree une "new"list pour stocker les
+                                               // feuilles du cluster
+        llInsertLast(new, btGetData(tree, n)); // on ajoute la feuille elle-même
+        llInsertLast(clusters, new);           // on ajoute le "new"cluster a la liste des clusters
+    }
 
-        int parentAbove = 1; // boolean pour savoir si le parent est au dessus du seuil T(1 = true, 0 = false)
-        if (parent != NULL)  // sinon tout l'arbre est en dessous du seuil
-        {
-            double dp = *(double *)btGetData(tree, parent); // distance du parent
-            parentAbove = (dp > T);                         // on verifie si le parent est au dessus du seuil
-        }
+    double dn = *(double *)btGetData(tree, n); // distance du noeud courant(on cast le
+                                               // retour de GetData en double)
 
-        // creation d'un cluster si conditions remplies///
+    int parentAbove = 1; // boolean pour savoir si le parent est au dessus du
+                         // seuil T(1 = true, 0 = false)
+    if (parent != NULL)  // sinon tout l'arbre est en dessous du seuil
+    {
+        double dp = *(double *)btGetData(tree, parent); // distance du parent
+        parentAbove = (dp > T);                         // on verifie si le parent est au dessus du seuil
+    }
 
-        if (dn <= T && parentAbove) // verifie que distance avec noeud en dessous < T < distance avec parent au dessus(conditions pour former un cluster)
-        {
-            List *new = llCreateEmpty();    // on cree une "new"list pour stocker les feuilles du cluster
-            collectLeavesRec(tree, n, new); // on collecte les feuilles du cluster
-            llInsertLast(clusters, new);    // on ajoute le "new"cluster a la liste des clusters
-            return;
-        }
+    // creation d'un cluster si conditions remplies///
+
+    if (dn <= T && parentAbove) // verifie que distance avec noeud en dessous <
+                                // T < distance avec parent au
+                                // dessus(conditions pour former un cluster)
+    {
+        List *new = llCreateEmpty();    // on cree une "new"list pour stocker les feuilles du cluster
+        collectLeavesRec(tree, n, new); // on collecte les feuilles du cluster
+        llInsertLast(clusters, new);    // on ajoute le "new"cluster a la liste des clusters
+        return;
     }
 
     // sinon on cherche plus bas
@@ -362,9 +401,11 @@ List *hclustGetClustersDist(Hclust *hc, double distanceThreshold)
 
 /// hclustGetClustersK ///
 
-static BTNode *maxDistanceNode(BTree *tree, List *nodes) // retourne le noeud interne avec la distance la plus grande pour pouvoir le couper
+static BTNode *maxDistanceNode(BTree *tree, List *nodes) // retourne le noeud interne avec la distance la
+                                                         // plus grande pour pouvoir le couper
 {
-    double maxDist = -1.0; // on initialise a -1 pour etre sur que toute distance positive soit plus grande
+    double maxDist = -1.0; // on initialise a -1 pour etre sur que toute distance
+                           // positive soit plus grande
     BTNode *best = NULL;   // noeud avec la distance max
 
     for (Node *p = llHead(nodes); p != NULL; p = llNext(p))
@@ -374,7 +415,8 @@ static BTNode *maxDistanceNode(BTree *tree, List *nodes) // retourne le noeud in
             continue;
 
         double dist = *(double *)btGetData(tree, n); // on récupère la distance du noeud courant
-        if (best == NULL || dist > maxDist)          // premier noeud (-> initialise) ou distance plus grande que la max actuelle
+        if (best == NULL || dist > maxDist)          // premier noeud (-> initialise) ou distance plus
+                                                     // grande que la max actuelle
         {
             maxDist = dist;
             best = n;
@@ -441,7 +483,8 @@ List *hclustGetClustersK(Hclust *hc, int K)
     for (Node *p = llHead(candidates); p != NULL; p = llNext(p))
     {
         BTNode *n = (BTNode *)llData(p); // on cast le data retourné par llData en BTNode*
-        List *new = llCreateEmpty();     // on crée une "new"list pour stocker les feuilles du cluster
+        List *new = llCreateEmpty();     // on crée une "new"list pour stocker les
+                                         // feuilles du cluster
         collectLeavesRec(tree, n, new);  // on collecte les feuilles du cluster
         llInsertLast(clusters, new);     // on ajoute le "new"cluster a la liste des clusters
     }

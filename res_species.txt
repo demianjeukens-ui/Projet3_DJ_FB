@@ -1,0 +1,137 @@
+Distance: 1000.0000
+  Distance: 0.6503
+    Distance: 0.1795
+      Distance: 0.1399
+        Monarch butterfly
+        Distance: 0.1304
+          Housefly
+          Termite
+      Asian lady beetle
+    Distance: 0.5213
+      Distance: 0.1793
+        Distance: 0.1660
+          Distance: 0.1108
+            American alligator
+            Distance: 0.0913
+              Distance: 0.0659
+                Distance: 0.0656
+                  Distance: 0.0629
+                    Distance: 0.0547
+                      Distance: 0.0517
+                        Distance: 0.0449
+                          Distance: 0.0116
+                            Brown rat
+                            House mouse
+                          Distance: 0.0422
+                            Distance: 0.0422
+                              Guinea pig
+                              Distance: 0.0408
+                                Distance: 0.0394
+                                  Distance: 0.0314
+                                    Chipmunk
+                                    Fox squirrel
+                                  Distance: 0.0394
+                                    Distance: 0.0327
+                                      Wild boar
+                                      Distance: 0.0260
+                                        Distance: 0.0168
+                                          Distance: 0.0142
+                                            Distance: 0.0038
+                                              White-tailed deer
+                                              Reindeer
+                                            Distance: 0.0090
+                                              Domestic Yak
+                                              Cattle
+                                          Northern giraffe
+                                        Distance: 0.0247
+                                          Horse
+                                          Distance: 0.0234
+                                            Distance: 0.0155
+                                              Distance: 0.0103
+                                                American black bear
+                                                Distance: 0.0090
+                                                  Asian black bear
+                                                  Polar bear
+                                              Giant panda
+                                            Distance: 0.0207
+                                              Distance: 0.0103
+                                                Distance: 0.0026
+                                                  Dog
+                                                  Distance: 0.0013
+                                                    Dingo
+                                                    Indian wolf
+                                                Red fox
+                                              Distance: 0.0181
+                                                Distance: 0.0142
+                                                  Indian rhinoceros
+                                                  White rhinoceros
+                                                Distance: 0.0077
+                                                  Hyaena
+                                                  Distance: 0.0064
+                                                    Cheetah
+                                                    Distance: 0.0064
+                                                      Distance: 0.0051
+                                                        Distance: 0.0038
+                                                          Domestic Cat
+                                                          Cougar
+                                                        Tiger
+                                                      Ocelot
+                                    Malayan porcupine
+                                American beaver
+                            Dolphin
+                        Distance: 0.0340
+                          Orangutan
+                          Distance: 0.0142
+                            Gorilla
+                            Distance: 0.0116
+                              Distance: 0.0038
+                                Human
+                                Neanderthal
+                              Distance: 0.0051
+                                Chimpanzee
+                                Bonobo
+                      Distance: 0.0422
+                        Distance: 0.0026
+                          Eastern gray kangaroo
+                          Wallaby
+                        Virginia opossum
+                    African bush elephant
+                  Koala
+                Platypus
+              Distance: 0.0884
+                Distance: 0.0872
+                  Distance: 0.0743
+                    Distance: 0.0742
+                      Gray treefrog
+                      Distance: 0.0558
+                        Distance: 0.0449
+                          Distance: 0.0435
+                            Distance: 0.0286
+                              Goldfish
+                              Fugu rubripes
+                            Great white shark
+                          Distance: 0.0273
+                            Fire salamander
+                            Eastern newt
+                        Alpine newt
+                    Edible frog
+                  Distance: 0.0557
+                    Distance: 0.0381
+                      Eurasian golden oriole
+                      Distance: 0.0341
+                        Cardinal
+                        American robin
+                    Distance: 0.0393
+                      Distance: 0.0300
+                        Bald Eagle
+                        Mourning dove
+                      Eurasian eagle-owl
+                Chinese giant salamander
+          Russels viper
+        Distance: 0.1639
+          Chameleon
+          Bearded Dragon
+      Common clothes moth
+  Distance: 0.3006
+    Western honeybee
+    Spotted Lanternfly

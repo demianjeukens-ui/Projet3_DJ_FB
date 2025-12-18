@@ -30,8 +30,8 @@ double phyloDNADistance(char *dna1, char *dna2)
 
     size_t n_min = (len1 < len2) ? len1 : len2;
 
-    int count_Q = 0; // Transitions
-    int count_P = 0; // Transversions
+    int Transitions = 0;   // Transitions
+    int Transversions = 0; // Transversions
     int n = 0;
 
     for (size_t i = 0; i < n_min; i++)
@@ -53,12 +53,12 @@ double phyloDNADistance(char *dna1, char *dna2)
 
         if ((isPurine(base1) && isPurine(base2)) || (isPyrimidine(base1) && isPyrimidine(base2)))
         {
-            count_Q++;
+            Transitions++;
         }
 
         else
         {
-            count_P++;
+            Transversions++;
         }
     }
 
@@ -67,15 +67,20 @@ double phyloDNADistance(char *dna1, char *dna2)
         return 0.0;
     }
 
-    double Q = (double)count_Q / n;
-    double P = (double)count_P / n;
+    double P = (double)Transitions / n;
+    double Q = (double)Transversions / n;
 
     double arg1 = 1.0 - 2.0 * P - Q;
     double arg2 = 1.0 - 2.0 * Q;
 
-    if (arg1 <= 0.0 || arg2 <= 0.0)
+    const double EPSILON = 1e-12;
+    if (arg1 <= EPSILON)
     {
-        return 1000.0;
+        arg1 = EPSILON;
+    }
+    if (arg2 <= EPSILON)
+    {
+        arg2 = EPSILON;
     }
 
     double dist = -0.5 * log(arg1) - 0.25 * log(arg2);

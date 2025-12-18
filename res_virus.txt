@@ -1,0 +1,41 @@
+Distance: 0.4814
+  Distance: 0.4578
+    Distance: 0.4444
+      Alger
+      Distance: 0.4169
+        Distance: 0.3420
+          Virus0
+          Distance: 0.3282
+            Distance: 0.2996
+              Distance: 0.1692
+                Amsterdam
+                Bruxelles
+              Distance: 0.2536
+                Distance: 0.2285
+                  Distance: 0.2002
+                    Milan
+                    Distance: 0.0915
+                      Bologne
+                      Venise
+                  Ljubljana
+                Distance: 0.1495
+                  Marseille
+                  Paris
+            Lilles
+        Distance: 0.3420
+          Londres
+          Manchester
+    Distance: 0.3383
+      Distance: 0.1550
+        Cork
+        Distance: 0.1431
+          Belfast
+          Dublin
+      Distance: 0.1737
+        Edimbourg
+        Glasgow
+  Distance: 0.2481
+    Distance: 0.0853
+      Casablanca
+      Marrakech
+    Tunis
